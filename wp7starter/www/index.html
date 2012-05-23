@@ -1,0 +1,140 @@
+﻿<!DOCTYPE html>
+
+<html>
+
+  <head>
+
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+
+
+
+    <title>Cordova WP7</title>
+
+
+
+    <link rel="stylesheet" href="master.css" type="text/css" media="screen" title="no title" charset="utf-8"/>
+
+
+
+
+
+    <script type="text/javascript" charset="utf-8" src="cordova-1.7.0.js"></script>
+
+
+
+    <script type="text/javascript">
+
+
+
+      document.addEventListener("deviceready",onDeviceReady,false);
+
+
+
+      // once the device ready event fires, you can safely do your thing! -jm
+
+      function onDeviceReady()
+
+      {
+
+      document.getElementById("welcomeMsg").innerHTML += "Cordova is ready! version=" + window.device.cordova;
+
+      console.log("onDeviceReady. You should see this message in Visual Studio's output window.");
+
+      }
+
+
+
+      function requestFileSystem() {
+
+      window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
+
+      }
+
+
+
+      function gotFS(fileSystem) {
+
+      fileSystem.root.getFile("readme.txt", {create: true, exclusive: false}, gotFileEntry, fail);
+
+      }
+
+
+
+      function gotFileEntry(fileEntry) {
+
+      fileEntry.createWriter(gotFileWriter, fail);
+
+      }
+
+
+
+      function gotFileWriter(writer) {
+
+      writer.onwriteend = function(evt) {
+
+      console.log("contents of file now 'some sample text'");
+
+      writer.truncate(11);
+
+      writer.onwriteend = function(evt) {
+
+      console.log("contents of file now 'some sample'");
+
+      writer.seek(4);
+
+      writer.write(" different text");
+
+      writer.onwriteend = function(evt){
+
+      console.log("contents of file now 'some different text'");
+
+      }
+
+      };
+
+      };
+
+      writer.write("some sample text");
+
+      }
+
+
+
+      function fail(evt) {
+
+      console.log("error: " + evt.target.error.code);
+
+      }
+
+
+
+    </script>
+
+
+
+
+
+
+
+
+
+  </head>
+
+  <body>
+
+    <h1>Hello Cordova</h1>
+
+    <div id="welcomeMsg"></div>
+
+    <div>
+
+      <button onclick="requestFileSystem();">Write File</button>
+
+    </div>
+
+  </body>
+
+</html>
+
