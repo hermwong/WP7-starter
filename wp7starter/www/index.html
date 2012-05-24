@@ -1,127 +1,118 @@
 ﻿<!DOCTYPE html>
-
 <html>
-
   <head>
 
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
 
     <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
 
-
-
     <title>Cordova WP7</title>
-
-
-
+    
     <link rel="stylesheet" href="master.css" type="text/css" media="screen" title="no title" charset="utf-8"/>
-
-
-
-
 
     <script type="text/javascript" charset="utf-8" src="cordova-1.7.0.js"></script>
 
-
-
     <script type="text/javascript">
-
-
-
+      
       document.addEventListener("deviceready",onDeviceReady,false);
 
-
-
       // once the device ready event fires, you can safely do your thing! -jm
-
       function onDeviceReady()
+      {
+        document.getElementById("welcomeMsg").innerHTML += "Cordova is ready! version=" + window.device.cordova;
+        console.log("onDeviceReady. You should see this message in Visual Studio's output window.");
+      }
 
+      function requestFileSystemForWrite() 
+      {
+        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFSWrite, fail);
+      }
+
+      requestFileSystemForRead() 
+      {
+        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFSRead, fail);
+      }
+
+
+      function gotFSWrite(fileSystem) 
+      {
+        fileSystem.root.getFile("readme.txt", {create: true, exclusive: false}, gotFileEntryWrite, fail);
+      }
+
+      function gotFSRead(fileSystem) 
+      {
+        fileSystem.root.getFile("readme.txt", null, gotFileEntryRead, fail);
+      }
+
+      function gotFileEntryWrite(fileEntry) 
+      {
+        fileEntry.createWriter(gotFileWriter, fail);
+      }
+      
+      function gotFileEntryRead(fileEntry) 
+      {
+        fileEntry.file(gotFileReader, fail);
+      }
+
+      function gotFileWriter(writer) 
       {
 
-      document.getElementById("welcomeMsg").innerHTML += "Cordova is ready! version=" + window.device.cordova;
+        writer.onwriteend = function(evt) 
+        {
+          console.log("contents of file now 'some sample text'");
+          writer.truncate(11);
 
-      console.log("onDeviceReady. You should see this message in Visual Studio's output window.");
+          writer.onwriteend = function(evt) 
+          {
+            console.log("contents of file now 'some sample'");
+            writer.seek(4);
+            writer.write(" different text");
 
+            writer.onwriteend = function(evt)
+            {
+              console.log("contents of file now 'some different text'");
+            }
+          };
+        };
+        writer.write("some sample text");
+      }
+      
+      function gotFileReader(file) 
+      {
+        readDataUrl(file);
+        readAsText(file);
       }
 
-
-
-      function requestFileSystem() {
-
-      window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
-
+      function readDataUrl(file) 
+      {
+        var reader = new FileReader();
+        reader.onloadend = function(evt) 
+        {
+          console.log("read as data url");
+          console.log(evt.target.result);
+        };
+        reader.readAsDataURL(file);
+      }
+      
+      function readAsText(file) 
+      {
+        var reader = new FileReader();
+        
+        reader.onloadend = function(evt) 
+        {
+          console.log("read as text");
+          console.log(evt.target.result);
+        };
+        reader.readAsText(file);
       }
 
-
-
-      function gotFS(fileSystem) {
-
-      fileSystem.root.getFile("readme.txt", {create: true, exclusive: false}, gotFileEntry, fail);
-
+      function fail(evt) 
+      {
+        console.log("error: " + evt.target.error.code);
       }
-
-
-
-      function gotFileEntry(fileEntry) {
-
-      fileEntry.createWriter(gotFileWriter, fail);
-
-      }
-
-
-
-      function gotFileWriter(writer) {
-
-      writer.onwriteend = function(evt) {
-
-      console.log("contents of file now 'some sample text'");
-
-      writer.truncate(11);
-
-      writer.onwriteend = function(evt) {
-
-      console.log("contents of file now 'some sample'");
-
-      writer.seek(4);
-
-      writer.write(" different text");
-
-      writer.onwriteend = function(evt){
-
-      console.log("contents of file now 'some different text'");
-
-      }
-
-      };
-
-      };
-
-      writer.write("some sample text");
-
-      }
-
-
-
-      function fail(evt) {
-
-      console.log("error: " + evt.target.error.code);
-
-      }
-
-
-
+      
     </script>
-
-
-
-
-
-
-
-
-
   </head>
-
   <body>
 
     <h1>Hello Cordova</h1>
@@ -130,7 +121,9 @@
 
     <div>
 
-      <button onclick="requestFileSystem();">Write File</button>
+      <button onclick="requestFileSystemForWrite();">Write File</button>
+      <br/>
+      <button onclick="requestFileSystemForRead();">Read File</button>
 
     </div>
 
